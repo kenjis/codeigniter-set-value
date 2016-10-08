@@ -1,35 +1,24 @@
 <?php
-/**
- * Part of ci-phpunit-test
- *
- * @author     Kenji Suzuki <https://github.com/kenjis>
- * @license    MIT License
- * @copyright  2015 Kenji Suzuki
- * @link       https://github.com/kenjis/ci-phpunit-test
- */
 
 class Welcome_test extends TestCase
 {
-	public function test_index()
+	public function test_set_value()
 	{
-		$output = $this->request('GET', '/');
-		$this->assertContains('<title>Welcome to CodeIgniter</title>', $output);
+		$output = $this->request('POST', 'welcome/set_value', ['text' => '<s>abc</s>']);
+		$this->assertEquals('&lt;s&gt;abc&lt;/s&gt;', $output);
 	}
 
-	public function test_method_404()
+	public function test_form_validation_success()
 	{
-		$this->request('GET', 'welcome/method_not_exist');
-		$this->assertResponseCode(404);
+		$output = $this->request('POST', 'welcome/form_validation', ['text' => '<s>abc</s>']);
+		$this->assertContains('before form_validation->run(): <br>', $output);
+		$this->assertContains('after validation failed: &lt;s&gt;abc&lt;/s&gt;<br>', $output);
 	}
 
-	public function test_APPPATH()
+	public function test_form_validation_failed()
 	{
-		$actual = realpath(APPPATH);
-		$expected = realpath(__DIR__ . '/../..');
-		$this->assertEquals(
-			$expected,
-			$actual,
-			'Your APPPATH seems to be wrong. Check your $application_folder in tests/Bootstrap.php'
-		);
+		$output = $this->request('POST', 'welcome/form_validation', ['text' => 'x']);
+		$this->assertContains('before form_validation->run(): <br>', $output);
+		$this->assertContains('after validation failed: x<br>', $output);
 	}
 }
